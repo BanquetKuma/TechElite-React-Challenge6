@@ -1,0 +1,158 @@
+/* ========================================
+   ProductCard Component Styles
+   ======================================== */
+
+.card {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 商品画像 */
+.imageContainer {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* 1:1 アスペクト比 */
+  background-color: var(--color-bg-secondary);
+  overflow: hidden;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.05);
+}
+
+/* 在庫切れバッジ */
+.outOfStock {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background-color: var(--color-error);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+/* カテゴリバッジ */
+.category {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  background-color: var(--color-primary);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* 商品情報 */
+.content {
+  padding: var(--spacing-md);
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  min-height: 2.8em;
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+  min-height: 3em;
+}
+
+/* 価格表示 */
+.priceContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.price {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.stock {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.stockLow {
+  color: var(--color-warning);
+  font-weight: 500;
+}
+
+/* 詳細リンクボタン */
+.detailLink {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  text-align: center;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.detailLink:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* 在庫切れ時のスタイル */
+.card.disabled {
+  opacity: 0.7;
+}
+
+.card.disabled .image {
+  filter: grayscale(50%);
+}
+
+.card.disabled .detailLink {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.card.disabled .detailLink:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}

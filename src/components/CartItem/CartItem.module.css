@@ -1,0 +1,148 @@
+/* ========================================
+   CartItem Component Styles
+   ======================================== */
+
+.item {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 商品画像 */
+.imageContainer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-bg-secondary);
+}
+
+.image {
+  object-fit: cover;
+}
+
+/* 商品情報 */
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.titleLink {
+  color: var(--color-text-primary);
+  transition: color 0.2s ease;
+}
+
+.titleLink:hover {
+  color: var(--color-primary);
+}
+
+.price {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* 数量コントロール */
+.quantityControl {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.quantityButton {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.quantityButton:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+.quantity {
+  min-width: 30px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* 合計・削除エリア */
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.subtotal {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.removeButton:hover {
+  background-color: var(--color-error);
+  color: white;
+}
+
+/* レスポンシブ */
+@media (max-width: 640px) {
+  .item {
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .imageContainer {
+    width: 80px;
+    height: 80px;
+    grid-row: span 2;
+  }
+
+  .info {
+    grid-column: 2;
+  }
+
+  .actions {
+    grid-column: 2;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
