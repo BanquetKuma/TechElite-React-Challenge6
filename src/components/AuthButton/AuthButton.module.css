@@ -1,0 +1,50 @@
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userName {
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.link {
+  color: #0070f3;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.logoutButton {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.logoutButton:hover {
+  background: #f5f5f5;
+}
+
+.loginLink {
+  padding: 0.5rem 1rem;
+  background: #0070f3;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.loginLink:hover {
+  background: #0051a8;
+}
+
+.loading {
+  color: #999;
+}

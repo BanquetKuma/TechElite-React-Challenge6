@@ -67,8 +67,12 @@ export default function CheckoutForm({
   onSubmit,
   isSubmitting,
   onPaymentMethodChange,
+  defaultValues,
 }: CheckoutFormProps) {
-  const [formData, setFormData] = useState<CheckoutFormData>(initialFormData);
+  // 解説: defaultValues があれば初期値として使用 (「戻る」ボタン対応)
+  const [formData, setFormData] = useState<CheckoutFormData>(
+    defaultValues || initialFormData
+  );
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -270,14 +274,6 @@ export default function CheckoutForm({
         )}
       </section>
 
-      {/* 送信ボタン */}
-      <button
-        type="submit"
-        className={styles.submitButton}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "処理中..." : "注文を確定"}
-      </button>
     </form>
   );
 }

@@ -9,6 +9,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import AuthButton from "@/components/AuthButton/AuthButton";
 import styles from "./Header.module.css";
 
 export default function Header() {
@@ -50,6 +51,8 @@ export default function Header() {
               </span>
             )}
           </Link>
+          {/* 認証ボタン */}
+          <AuthButton />
         </div>
 
         {/* モバイルメニューボタン */}
@@ -86,6 +89,10 @@ export default function Header() {
             </span>
           )}
         </Link>
+        {/* モバイル用認証ボタン */}
+        <div className={styles.mobileAuth}>
+          <AuthButton />
+        </div>
       </div>
     </header>
   );

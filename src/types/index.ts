@@ -130,6 +130,42 @@ export type Order = {
   status: OrderStatus;
 };
 
+/**
+ * 保存される注文データの型定義（API用）
+ * 解説: createdAt を string で保持（JSON シリアライズ対応）
+ */
+export type SavedOrder = {
+  /** 注文ID */
+  id: string;
+  /** ユーザーID */
+  userId: string;
+  /** 注文アイテム */
+  items: CartItem[];
+  /** 配送情報 */
+  shippingInfo: CheckoutFormData;
+  /** 合計金額 */
+  totalPrice: number;
+  /** 注文日時（ISO 8601形式の文字列） */
+  createdAt: string;
+  /** 注文ステータス */
+  status: OrderStatus;
+};
+
+/**
+ * 注文コンテキストの値の型定義
+ * 解説: Context API で共有する注文関連の状態と操作
+ */
+export type OrderContextValue = {
+  /** 注文履歴 */
+  orders: SavedOrder[];
+  /** 注文を追加 (orderId は Server Action から渡す) */
+  addOrder: (order: Omit<SavedOrder, "createdAt">) => SavedOrder;
+  /** 注文履歴を取得 */
+  fetchOrders: () => Promise<void>;
+  /** ローディング状態 */
+  isLoading: boolean;
+};
+
 // ========================================
 // API関連の型定義
 // ========================================
@@ -197,6 +233,7 @@ export type CheckoutFormProps = {
   onSubmit: (data: CheckoutFormData) => void;
   isSubmitting: boolean;
   onPaymentMethodChange?: (method: PaymentMethod) => void;
+  defaultValues?: CheckoutFormData;
 };
 
 /**
@@ -207,4 +244,5 @@ export type OrderSummaryProps = {
   total: number;
   paymentMethod?: PaymentMethod;
   isSubmitting?: boolean;
+  showSubmitButton?: boolean;
 };

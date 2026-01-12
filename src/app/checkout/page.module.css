@@ -155,6 +155,154 @@
   background-color: var(--color-primary-dark);
 }
 
+/* ========================================
+   Step Indicator Styles
+   ======================================== */
+
+.stepIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.stepIndicator span {
+  font-size: var(--font-size-sm);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+}
+
+.stepCurrent {
+  background: var(--color-primary);
+  color: white;
+}
+
+.stepComplete {
+  background: #d4edda;
+  color: #155724;
+}
+
+.stepPending {
+  background: #e9ecef;
+  color: var(--color-text-secondary);
+}
+
+/* ========================================
+   Confirm Screen Styles
+   ======================================== */
+
+.confirmContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.section {
+  background: var(--color-bg-primary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.confirmInfo {
+  color: var(--color-text-primary);
+  line-height: 1.8;
+}
+
+.confirmInfo p {
+  margin: 0;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.backButton {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.confirmButton {
+  padding: 0.75rem 2rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.confirmButton:hover {
+  background: var(--color-primary-dark);
+}
+
+.confirmButton:disabled,
+.backButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   Success Screen Styles
+   ======================================== */
+
+.successActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.ordersLink {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.ordersLink:hover {
+  background: var(--color-primary-dark);
+}
+
+/* ========================================
+   Error Message
+   ======================================== */
+
+.error {
+  background: #fee;
+  color: #c00;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
 /* レスポンシブ */
 @media (max-width: 1024px) {
   .content {
@@ -178,5 +326,25 @@
 
   .formSection {
     padding: var(--spacing-lg);
+  }
+
+  .stepIndicator {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .stepIndicator span {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .confirmActions {
+    flex-direction: column;
+  }
+
+  .backButton,
+  .confirmButton {
+    width: 100%;
+    text-align: center;
   }
 }

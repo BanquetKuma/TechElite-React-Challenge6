@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ========================================
+// User Model
+// ========================================
+// 解説: ユーザー情報を保存するテーブル
+// - NextAuth.js との統合も可能
+// - orders リレーションで注文履歴を紐付け
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+// ========================================
+// Order Model
+// ========================================
+// 解説: 注文情報を保存するテーブル
+// - items: CartItem[] を JSON 文字列で保存
+// - shippingInfo: CheckoutFormData を JSON 文字列で保存
+// - userId でユーザーと紐付け
+model Order {
+  id           String   @id
+  userId       String
+  items        String   // JSON string (CartItem[])
+  shippingInfo String   // JSON string (CheckoutFormData)
+  totalPrice   Int
+  status       String   @default("confirmed")
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+}

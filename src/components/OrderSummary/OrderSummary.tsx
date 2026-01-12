@@ -15,7 +15,7 @@ const FREE_SHIPPING_THRESHOLD = 10000;
 const SHIPPING_FEE = 500;
 const COD_FEE = 330; // 代金引換手数料
 
-export default function OrderSummary({ items, total, paymentMethod, isSubmitting }: OrderSummaryProps) {
+export default function OrderSummary({ items, total, paymentMethod, isSubmitting, showSubmitButton = true }: OrderSummaryProps) {
   // 送料計算
   const shippingFee = total >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   // 代金引換手数料
@@ -95,14 +95,16 @@ export default function OrderSummary({ items, total, paymentMethod, isSubmitting
       </p>
 
       {/* 注文確定ボタン */}
-      <button
-        type="submit"
-        form="checkout-form"
-        className={styles.submitButton}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "処理中..." : "注文を確定"}
-      </button>
+      {showSubmitButton && (
+        <button
+          type="submit"
+          form="checkout-form"
+          className={styles.submitButton}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "処理中..." : "注文を確定"}
+        </button>
+      )}
     </aside>
   );
 }
