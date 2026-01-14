@@ -7,7 +7,7 @@
 // session_id パラメータを受け取り、決済成功を表示
 // 注文情報をDBに保存して購入履歴に反映
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -15,7 +15,28 @@ import { useCart } from "@/context/CartContext";
 import { useOrders } from "@/context/OrderContext";
 import styles from "../page.module.css";
 
-export default function CheckoutCompletePage() {
+// ----------------------------------------
+// ローディングコンポーネント
+// ----------------------------------------
+function LoadingState() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.successMessage}>
+        <div className={styles.successIcon}>...</div>
+        <h1 className={styles.successTitle}>読み込み中</h1>
+        <p className={styles.successText}>
+          しばらくお待ちください...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------
+// 決済完了コンテンツコンポーネント
+// ----------------------------------------
+// useSearchParams()を使用するためSuspense内で呼び出す
+function CheckoutCompleteContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { data: session } = useSession();
@@ -172,5 +193,17 @@ export default function CheckoutCompletePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ----------------------------------------
+// ページコンポーネント
+// ----------------------------------------
+// Suspenseでラップしてビルドエラーを回避
+export default function CheckoutCompletePage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <CheckoutCompleteContent />
+    </Suspense>
   );
 }
