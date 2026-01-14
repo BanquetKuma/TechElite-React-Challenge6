@@ -9,7 +9,7 @@
 // Step 2: 注文内容確認
 // Step 3: 注文完了
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -31,7 +31,28 @@ import styles from "./page.module.css";
 // - "complete": 完了画面
 type CheckoutStep = "form" | "confirm" | "complete";
 
-export default function CheckoutPage() {
+// ----------------------------------------
+// ローディングコンポーネント
+// ----------------------------------------
+function LoadingState() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.emptyCart}>
+        <div className={styles.emptyCartIcon}>...</div>
+        <h1 className={styles.emptyCartTitle}>読み込み中</h1>
+        <p className={styles.emptyCartText}>
+          しばらくお待ちください...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ----------------------------------------
+// チェックアウトコンテンツコンポーネント
+// ----------------------------------------
+// useSearchParams()を使用するためSuspense内で呼び出す
+function CheckoutContent() {
   const { data: session } = useSession();
   const { cartItems, totalPrice, clearCart } = useCart();
   const { addOrder } = useOrders();
@@ -345,5 +366,17 @@ export default function CheckoutPage() {
         </aside>
       </div>
     </div>
+  );
+}
+
+// ----------------------------------------
+// ページコンポーネント
+// ----------------------------------------
+// Suspenseでラップしてビルドエラーを回避
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
