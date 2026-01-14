@@ -1,7 +1,7 @@
 # EC Site - React学習プロジェクト Challenge 6
 
 Next.js App Routerを使用したECサイトの実装プロジェクトです。
-Challenge 6では、NextAuth.js認証とSupabase PostgreSQLによるデータ永続化を実装しています。
+Challenge 6では、NextAuth.js認証、Supabase PostgreSQLによるデータ永続化、Stripe決済連携を実装しています。
 
 ## デプロイURL
 
@@ -17,6 +17,7 @@ https://tech-elite-react-challenge6.vercel.app/
 - **NextAuth.js v4** - 認証ライブラリ (JWT方式)
 - **Prisma** - TypeScript ORM
 - **Supabase** - PostgreSQLマネージドデータベース
+- **Stripe** - オンライン決済プラットフォーム
 - **bcryptjs** - パスワードハッシュ化
 
 ## 機能一覧
@@ -29,16 +30,64 @@ https://tech-elite-react-challenge6.vercel.app/
 - 注文確認ページ
 - レスポンシブデザイン
 
-### 認証機能 (Challenge 6 新規)
+### 認証機能
 - ユーザー新規登録
 - ログイン/ログアウト
 - パスワードハッシュ化 (bcrypt)
 - JWT方式セッション管理
 
-### データ永続化 (Challenge 6 新規)
+### データ永続化
 - 注文履歴のDB保存 (Supabase)
 - ユーザー別注文履歴表示
 - Vercelデプロイ後も永続化維持
+
+### Stripe決済連携 (新規)
+- クレジットカード決済 (Stripe Checkout)
+- テストモード対応
+- 決済完了後の注文自動保存
+- 購入履歴への反映
+
+### お気に入り機能 (新規)
+- 商品のお気に入り登録/解除
+- お気に入り一覧ページ
+- LocalStorage永続化
+
+### 検索機能 (新規)
+- キーワードによる商品検索
+- 商品名・説明での絞り込み
+
+### 購入履歴機能 (新規)
+- 注文履歴一覧表示
+- 商品画像付き表示
+- 全注文の合計金額表示
+
+## Stripe決済テスト方法
+
+### テスト用カード情報
+
+Stripeテストモードでは、以下のテストカードが使用できます:
+
+| カード番号 | 説明 |
+|------------|------|
+| `4242 4242 4242 4242` | 決済成功 |
+| `4000 0000 0000 0002` | カード拒否 |
+| `4000 0000 0000 9995` | 残高不足 |
+
+**共通設定:**
+- 有効期限: 任意の未来日付 (例: `12/34`)
+- CVC: 任意の3桁 (例: `123`)
+- 郵便番号: 任意 (例: `12345`)
+
+### 決済テスト手順
+
+1. 商品をカートに追加
+2. チェックアウトページで配送先情報を入力
+3. 支払い方法で「クレジットカード」を選択
+4. 「注文を確定する」をクリック
+5. Stripe Checkoutページでテストカード情報を入力
+6. 「支払う」ボタンをクリック
+7. 決済完了後、自動的に完了ページにリダイレクト
+8. 購入履歴ページで注文を確認
 
 ## プロジェクト構成
 
@@ -52,16 +101,23 @@ ec-site/
 │   │   │   ├── auth/
 │   │   │   │   ├── [...nextauth]/route.ts  # NextAuth API
 │   │   │   │   └── register/route.ts       # 新規登録API
-│   │   │   └── orders/route.ts             # 注文API
+│   │   │   ├── orders/route.ts             # 注文API
+│   │   │   └── stripe/                     # Stripe API
+│   │   │       ├── checkout-session/route.ts  # Checkout Session作成
+│   │   │       ├── session/[sessionId]/route.ts # Session情報取得
+│   │   │       └── webhook/route.ts        # Webhook受信
 │   │   ├── cart/               # カートページ
 │   │   ├── checkout/           # チェックアウトページ
+│   │   │   ├── page.tsx        # チェックアウトフォーム
+│   │   │   └── complete/       # 決済完了ページ
+│   │   ├── favorites/          # お気に入りページ
 │   │   ├── login/              # ログインページ
 │   │   ├── register/           # 新規登録ページ
 │   │   ├── products/           # 商品ページ
 │   │   │   ├── page.tsx        # 商品一覧
 │   │   │   └── [id]/           # 商品詳細 (動的ルート)
 │   │   └── user/
-│   │       └── orders/         # 注文履歴ページ
+│   │       └── orders/         # 購入履歴ページ
 │   ├── components/             # 再利用可能コンポーネント
 │   │   ├── AddToCartButton/    # カート追加ボタン
 │   │   ├── CartItem/           # カート商品アイテム
@@ -72,10 +128,13 @@ ec-site/
 │   │   └── ProductCard/        # 商品カード
 │   ├── context/                # React Context
 │   │   ├── CartContext.tsx     # カート状態管理
-│   │   └── OrderContext.tsx    # 注文状態管理
+│   │   ├── OrderContext.tsx    # 注文状態管理
+│   │   └── FavoritesContext.tsx # お気に入り状態管理
 │   ├── lib/                    # ユーティリティ
 │   │   ├── prisma.ts           # Prismaクライアント
-│   │   └── authOptions.ts      # NextAuth設定
+│   │   ├── authOptions.ts      # NextAuth設定
+│   │   ├── stripe.ts           # Stripeサーバークライアント
+│   │   └── stripe-client.ts    # Stripeクライアントサイド
 │   ├── data/                   # 静的データ
 │   │   └── products.ts         # 商品データ
 │   └── types/                  # TypeScript型定義
@@ -120,6 +179,7 @@ model Order {
 - Node.js 18.0以上
 - npm
 - Supabaseアカウント (データベース用)
+- Stripeアカウント (決済用)
 
 ### インストール
 
@@ -129,7 +189,7 @@ npm install
 
 # 環境変数の設定 (.env.localを作成)
 cp .env.example .env.local
-# DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, NEXTAUTH_URL を設定
+# 各種環境変数を設定
 
 # Prismaクライアント生成
 npx prisma generate
@@ -153,6 +213,11 @@ DIRECT_URL="postgresql://..."
 # NextAuth.js
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret-key
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...  # 本番環境用
 ```
 
 ## スクリプト
@@ -174,7 +239,7 @@ NEXTAUTH_SECRET=your-secret-key
 - APIルート (Route Handlers)
 
 ### React状態管理
-- Context APIによるグローバル状態 (カート、注文)
+- Context APIによるグローバル状態 (カート、注文、お気に入り)
 - useStateによるローカル状態
 - localStorageとの連携
 
@@ -189,10 +254,17 @@ NEXTAUTH_SECRET=your-secret-key
 - PostgreSQLマイグレーション
 - Connection Pooler設定
 
+### Stripe決済連携
+- Stripe Checkout (ホスト型決済ページ)
+- Checkout Session API
+- metadataによるカート情報保存
+- 決済完了後の注文自動保存
+
 ### セキュリティ
 - bcryptによるパスワードハッシュ
 - 環境変数による秘密情報管理
 - CSRFプロテクション
+- Stripe署名検証 (Webhook)
 
 ### TypeScript
 - 型定義による安全なコード

@@ -9,12 +9,15 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import AuthButton from "@/components/AuthButton/AuthButton";
 import styles from "./Header.module.css";
 
 export default function Header() {
   // カート情報を取得
   const { totalItems } = useCart();
+  // お気に入り情報を取得
+  const { favoritesCount } = useFavorites();
 
   // モバイルメニューの開閉状態
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,6 +44,15 @@ export default function Header() {
         <div className={styles.navLinks}>
           <Link href="/products" className={styles.navLink}>
             商品一覧
+          </Link>
+          <Link href="/favorites" className={styles.favoritesLink}>
+            <span className={styles.favoritesIcon}>♡</span>
+            <span>お気に入り</span>
+            {favoritesCount > 0 && (
+              <span className={styles.favoritesBadge} key={favoritesCount}>
+                {favoritesCount > 99 ? "99+" : favoritesCount}
+              </span>
+            )}
           </Link>
           <Link href="/cart" className={styles.cartLink}>
             <span className={styles.cartIcon}>🛒</span>
@@ -76,6 +88,18 @@ export default function Header() {
           onClick={closeMenu}
         >
           商品一覧
+        </Link>
+        <Link
+          href="/favorites"
+          className={styles.mobileFavoritesLink}
+          onClick={closeMenu}
+        >
+          <span>♡ お気に入り</span>
+          {favoritesCount > 0 && (
+            <span className={styles.mobileBadge}>
+              {favoritesCount > 99 ? "99+" : favoritesCount}
+            </span>
+          )}
         </Link>
         <Link
           href="/cart"

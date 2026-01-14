@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { OrderProvider } from "@/context/OrderContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import SessionWrapper from "@/components/SessionWrapper/SessionWrapper";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
@@ -58,17 +59,20 @@ export default function RootLayout({
         <SessionWrapper>
           {/* CartProviderでカート状態を共有 */}
           <CartProvider>
-            {/* OrderProviderで注文履歴を共有 */}
-            <OrderProvider>
-              {/* ヘッダー（全ページ共通） */}
-              <Header />
+            {/* FavoritesProviderでお気に入り状態を共有 */}
+            <FavoritesProvider>
+              {/* OrderProviderで注文履歴を共有 */}
+              <OrderProvider>
+                {/* ヘッダー（全ページ共通） */}
+                <Header />
 
-              {/* メインコンテンツ */}
-              <main>{children}</main>
+                {/* メインコンテンツ */}
+                <main>{children}</main>
 
-              {/* フッター（全ページ共通） */}
-              <Footer />
-            </OrderProvider>
+                {/* フッター（全ページ共通） */}
+                <Footer />
+              </OrderProvider>
+            </FavoritesProvider>
           </CartProvider>
         </SessionWrapper>
       </body>

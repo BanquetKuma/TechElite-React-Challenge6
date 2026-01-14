@@ -9,12 +9,14 @@
 // Step 2: 注文内容確認
 // Step 3: 注文完了
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useOrders } from "@/context/OrderContext";
 import { validateCheckoutForm, createOrder } from "./actions";
+import { getStripe } from "@/lib/stripe-client";
 import CheckoutForm from "@/components/CheckoutForm/CheckoutForm";
 import OrderSummary from "@/components/OrderSummary/OrderSummary";
 import type { CheckoutFormData, PaymentMethod } from "@/types";
@@ -33,6 +35,7 @@ export default function CheckoutPage() {
   const { data: session } = useSession();
   const { cartItems, totalPrice, clearCart } = useCart();
   const { addOrder } = useOrders();
+  const searchParams = useSearchParams();
 
   // ----------------------------------------
   // State管理
@@ -48,6 +51,13 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [error, setError] = useState("");
+
+  // Stripeからのキャンセルリダイレクト処理
+  useEffect(() => {
+    if (searchParams.get("canceled") === "true") {
+      setError("決済がキャンセルされました。再度お試しください。");
+    }
+  }, [searchParams]);
 
   // カートが空の場合
   if (cartItems.length === 0 && currentStep !== "complete") {
@@ -95,16 +105,56 @@ export default function CheckoutPage() {
   // Step 2: 注文確定
   // ========================================
   // 解説: Server Actions で注文処理
-  // 1. createOrder() で注文ID生成
-  // 2. Context に保存 (ログイン時)
-  // 3. カートクリア
-  // 4. 完了画面へ遷移
+  // クレジットカードの場合: Stripe Checkoutにリダイレクト
+  // 銀行振込・代金引換の場合: 従来の処理
   const handleConfirmOrder = async () => {
     if (!formData) return;
 
     setError("");
     setIsSubmitting(true);
 
+    // ----------------------------------------
+    // クレジットカードの場合: Stripe Checkout
+    // ----------------------------------------
+    if (formData.paymentMethod === "credit") {
+      try {
+        // Stripe Checkout Session作成
+        const response = await fetch("/api/stripe/checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: cartItems,
+            shippingInfo: formData,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          setError(data.error);
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Stripe Checkoutページにリダイレクト (URL直接リダイレクト)
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          setError("決済URLの取得に失敗しました");
+          setIsSubmitting(false);
+        }
+        return;
+      } catch (err) {
+        console.error("Stripe error:", err);
+        setError("決済処理でエラーが発生しました");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    // ----------------------------------------
+    // 銀行振込・代金引換の場合: 従来の処理
+    // ----------------------------------------
     // Server Action で注文作成
     const result = await createOrder(formData, cartItems, totalPrice);
 
@@ -117,8 +167,6 @@ export default function CheckoutPage() {
     setOrderNumber(result.orderId!);
 
     // 注文履歴に保存 (ログイン時)
-    // 解説: Server Action から返された orderId を渡すことで、
-    // 表示される注文番号と DB に保存される注文番号が一致する
     if (session?.user) {
       addOrder({
         id: result.orderId!,

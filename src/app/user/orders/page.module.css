@@ -214,6 +214,28 @@
   color: #e74c3c;
 }
 
+/* 全注文の合計金額 */
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  color: white;
+}
+
+.grandTotalLabel {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.grandTotalAmount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
 /* 戻るリンク */
 .backLink {
   display: inline-block;

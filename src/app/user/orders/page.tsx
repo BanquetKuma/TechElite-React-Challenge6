@@ -150,6 +150,15 @@ export default function OrderHistoryPage() {
               </div>
             </article>
           ))}
+          {/* 全注文の合計金額 */}
+          <div className={styles.grandTotal}>
+            <span className={styles.grandTotalLabel}>
+              全{orders.length}件の購入合計
+            </span>
+            <span className={styles.grandTotalAmount}>
+              ¥{orders.reduce((sum, order) => sum + order.totalPrice, 0).toLocaleString()}
+            </span>
+          </div>
         </div>
       )}
 

@@ -35,6 +35,7 @@ export default function ProductsPage() {
   // フィルター状態
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // 全カテゴリ取得
   const categories = getAllCategories();
@@ -48,6 +49,16 @@ export default function ProductsPage() {
         : mockProducts.filter(
             (product) => product.category === selectedCategory
           );
+
+    // キーワード検索でフィルタリング
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      products = products.filter(
+        (product) =>
+          product.title.toLowerCase().includes(term) ||
+          product.description.toLowerCase().includes(term)
+      );
+    }
 
     // ソート
     switch (sortBy) {
@@ -66,12 +77,13 @@ export default function ProductsPage() {
     }
 
     return products;
-  }, [selectedCategory, sortBy]);
+  }, [selectedCategory, sortBy, searchTerm]);
 
   // フィルターリセット
   const resetFilters = () => {
     setSelectedCategory("all");
     setSortBy("default");
+    setSearchTerm("");
   };
 
   return (
@@ -86,6 +98,18 @@ export default function ProductsPage() {
 
       {/* フィルター・ソートセクション */}
       <div className={styles.filterSection}>
+        {/* キーワード検索 */}
+        <div className={styles.searchGroup}>
+          <input
+            type="text"
+            id="search"
+            className={styles.searchInput}
+            placeholder="商品名・説明で検索..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         <div className={styles.filterGroup}>
           <label htmlFor="category" className={styles.filterLabel}>
             カテゴリ:

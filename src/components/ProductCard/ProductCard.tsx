@@ -1,3 +1,5 @@
+"use client";
+
 // ========================================
 // ProductCard Component
 // ========================================
@@ -7,6 +9,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ProductCardProps } from "@/types";
+import { useFavorites } from "@/context/FavoritesContext";
 import styles from "./ProductCard.module.css";
 
 // カテゴリ名の日本語マッピング
@@ -28,6 +31,21 @@ export default function ProductCard({ product }: ProductCardProps) {
     category,
     stock,
   } = product;
+
+  // お気に入り機能
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const isProductFavorite = isFavorite(id);
+
+  // お気に入りトグル
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Linkへの伝播を防ぐ
+    e.stopPropagation();
+    if (isProductFavorite) {
+      removeFavorite(id);
+    } else {
+      addFavorite(product);
+    }
+  };
 
   // 在庫状況の判定
   const isOutOfStock = stock === 0;
@@ -52,6 +70,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={styles.image}
         />
+        {/* お気に入りボタン */}
+        <button
+          className={`${styles.favoriteButton} ${isProductFavorite ? styles.favoriteActive : ""}`}
+          onClick={handleFavoriteClick}
+          aria-label={isProductFavorite ? "お気に入りから削除" : "お気に入りに追加"}
+        >
+          {isProductFavorite ? "♥" : "♡"}
+        </button>
         {/* カテゴリバッジ */}
         <span className={styles.category}>{categoryLabel}</span>
         {/* 在庫切れバッジ */}

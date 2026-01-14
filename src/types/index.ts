@@ -167,6 +167,29 @@ export type OrderContextValue = {
 };
 
 // ========================================
+// お気に入り関連の型定義
+// ========================================
+
+/**
+ * お気に入りコンテキストの値の型定義
+ * 解説: Context API で共有するお気に入り関連の状態と操作
+ */
+export type FavoritesContextValue = {
+  /** お気に入り商品リスト */
+  favorites: Product[];
+  /** お気に入りに追加 */
+  addFavorite: (product: Product) => void;
+  /** お気に入りから削除 */
+  removeFavorite: (productId: number) => void;
+  /** お気に入り判定 */
+  isFavorite: (productId: number) => boolean;
+  /** お気に入りをクリア */
+  clearFavorites: () => void;
+  /** お気に入り数 */
+  favoritesCount: number;
+};
+
+// ========================================
 // API関連の型定義
 // ========================================
 

@@ -1,0 +1,116 @@
+/* ========================================
+   Favorites Page Styles
+   ======================================== */
+
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+/* ページヘッダー */
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+/* アクションボタン */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-lg);
+}
+
+.clearButton {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.clearButton:hover {
+  background-color: var(--color-error);
+  color: white;
+}
+
+/* 商品グリッド */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* 空の状態 */
+.empty {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  color: var(--color-text-secondary);
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-secondary);
+}
+
+.emptyTitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.emptyText {
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.browseButton {
+  display: inline-block;
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.browseButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .productGrid {
+    grid-template-columns: 1fr;
+  }
+}

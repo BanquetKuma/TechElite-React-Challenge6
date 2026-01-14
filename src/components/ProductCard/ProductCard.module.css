@@ -155,3 +155,39 @@
   background-color: var(--color-bg-secondary);
   color: var(--color-text-secondary);
 }
+
+/* お気に入りボタン */
+.favoriteButton {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  right: var(--spacing-sm);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.favoriteButton:hover {
+  transform: scale(1.1);
+  background-color: white;
+  color: var(--color-error);
+}
+
+.favoriteActive {
+  color: var(--color-error);
+  background-color: white;
+}
+
+.favoriteActive:hover {
+  color: var(--color-error);
+}
