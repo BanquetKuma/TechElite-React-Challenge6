@@ -118,11 +118,12 @@ export async function createOrder(
       };
     }
 
-    // 在庫確認 (本番ではここでDBチェック)
-    // const outOfStockItems = items.filter(item => item.product.stock < item.quantity);
-    // if (outOfStockItems.length > 0) {
-    //   return { success: false, error: "在庫切れの商品があります" };
-    // }
+    // 在庫確認
+    const outOfStockItems = items.filter(item => item.product.stock < item.quantity);
+    if (outOfStockItems.length > 0) {
+      const itemNames = outOfStockItems.map(item => item.product.title).join(", ");
+      return { success: false, error: `在庫切れの商品があります: ${itemNames}` };
+    }
 
     // 注文ID生成
     const orderId = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random()

@@ -5,11 +5,12 @@ import { prisma } from "@/lib/prisma";
 import type { CartItem, CheckoutFormData, SavedOrder } from "@/types";
 
 // ========================================
-// 注文 API Routes (Prisma + SQLite)
+// 注文 API Routes (Prisma + Supabase)
 // ========================================
-// 解説: メモリ内 Map から Prisma + SQLite に移行
+// 解説: Prisma + Supabase PostgreSQL で注文を管理
 // - データベースに永続化されるため、サーバー再起動後もデータが残る
 // - items と shippingInfo は JSON 文字列として保存
+// - 注文確定時に在庫を減算 (動的在庫管理)
 
 // ========================================
 // GET: ユーザーの注文履歴を取得
@@ -94,17 +95,66 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prisma で注文を作成
-    // 解説: items と shippingInfo は JSON.stringify でシリアライズして保存
-    const order = await prisma.order.create({
-      data: {
-        id: id || generateOrderId(),
-        userId: session.user.id,
-        items: JSON.stringify(items),
-        shippingInfo: JSON.stringify(shippingInfo),
-        totalPrice,
-        status: status || "confirmed",
-      },
+    // ========================================
+    // DBから最新の在庫をチェック
+    // ========================================
+    // 解説: カート内の商品IDでDBから最新在庫を取得
+    const productIds = items.map((item: CartItem) => item.product.id);
+    const dbProducts = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+
+    // 在庫チェック (DBの最新在庫と比較)
+    const outOfStockItems: { title: string; stock: number; requested: number }[] = [];
+    for (const item of items) {
+      const dbProduct = dbProducts.find((p) => p.id === item.product.id);
+      if (!dbProduct || dbProduct.stock < item.quantity) {
+        outOfStockItems.push({
+          title: item.product.title,
+          stock: dbProduct?.stock || 0,
+          requested: item.quantity,
+        });
+      }
+    }
+
+    if (outOfStockItems.length > 0) {
+      const errorDetails = outOfStockItems
+        .map((item) => `${item.title} (在庫: ${item.stock}, 注文: ${item.requested})`)
+        .join(", ");
+      return NextResponse.json(
+        { success: false, error: `在庫不足の商品があります: ${errorDetails}` },
+        { status: 400 }
+      );
+    }
+
+    // ========================================
+    // トランザクションで注文作成 + 在庫減算
+    // ========================================
+    // 解説: 注文作成と在庫減算を同時に行い、整合性を保つ
+    const order = await prisma.$transaction(async (tx) => {
+      // 1. 注文を作成
+      const newOrder = await tx.order.create({
+        data: {
+          id: id || generateOrderId(),
+          userId: session.user.id,
+          items: JSON.stringify(items),
+          shippingInfo: JSON.stringify(shippingInfo),
+          totalPrice,
+          status: status || "confirmed",
+        },
+      });
+
+      // 2. 各商品の在庫を減算
+      for (const item of items) {
+        await tx.product.update({
+          where: { id: item.product.id },
+          data: {
+            stock: { decrement: item.quantity },
+          },
+        });
+      }
+
+      return newOrder;
     });
 
     // レスポンス用にパース

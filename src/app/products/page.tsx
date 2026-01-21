@@ -5,10 +5,11 @@
 // ========================================
 // 商品一覧ページ
 // カテゴリフィルタリングとソート機能付き
+// 変更: モックデータ → API経由でDBから取得 (動的在庫対応)
 
-import { useState, useMemo } from "react";
-import { mockProducts, getAllCategories } from "@/data/products";
+import { useState, useEffect, useMemo } from "react";
 import ProductCard from "@/components/ProductCard/ProductCard";
+import { Product } from "@/types";
 import styles from "./page.module.css";
 
 // カテゴリ名の日本語マッピング
@@ -32,28 +33,56 @@ const sortLabels: Record<SortOption, string> = {
 };
 
 export default function ProductsPage() {
+  // 商品データの状態
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // フィルター状態
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // 全カテゴリ取得
-  const categories = getAllCategories();
+  // APIから商品データを取得 (DBから最新在庫を取得)
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/products");
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          setProducts(data.data);
+        }
+      } catch (err) {
+        console.error("商品の取得に失敗しました:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // カテゴリ一覧を商品データから生成
+  const categories = useMemo(() => {
+    const cats = new Set(products.map((p) => p.category));
+    return ["all", ...Array.from(cats)];
+  }, [products]);
 
   // フィルタリング・ソート済み商品
   const filteredProducts = useMemo(() => {
     // カテゴリでフィルタリング
-    let products =
+    let filtered =
       selectedCategory === "all"
-        ? [...mockProducts]
-        : mockProducts.filter(
+        ? [...products]
+        : products.filter(
             (product) => product.category === selectedCategory
           );
 
     // キーワード検索でフィルタリング
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      products = products.filter(
+      filtered = filtered.filter(
         (product) =>
           product.title.toLowerCase().includes(term) ||
           product.description.toLowerCase().includes(term)
@@ -63,21 +92,21 @@ export default function ProductsPage() {
     // ソート
     switch (sortBy) {
       case "price-asc":
-        products.sort((a, b) => a.price - b.price);
+        filtered.sort((a, b) => a.price - b.price);
         break;
       case "price-desc":
-        products.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => b.price - a.price);
         break;
       case "name":
-        products.sort((a, b) => a.title.localeCompare(b.title, "ja"));
+        filtered.sort((a, b) => a.title.localeCompare(b.title, "ja"));
         break;
       default:
         // おすすめ順（IDの順序を維持）
         break;
     }
 
-    return products;
-  }, [selectedCategory, sortBy, searchTerm]);
+    return filtered;
+  }, [products, selectedCategory, sortBy, searchTerm]);
 
   // フィルターリセット
   const resetFilters = () => {

@@ -2,11 +2,13 @@
 // Stripe Checkout Session API
 // ========================================
 // Stripe Checkout Sessionを作成するAPIエンドポイント
+// 変更点: DBから最新の在庫情報を取得してチェック
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { stripe } from "@/lib/stripe";
+import { prisma } from "@/lib/prisma";
 import { CartItem } from "@/types";
 
 export async function POST(request: NextRequest) {
@@ -26,6 +28,37 @@ export async function POST(request: NextRequest) {
     if (!items || items.length === 0) {
       return NextResponse.json(
         { error: "カートが空です" },
+        { status: 400 }
+      );
+    }
+
+    // ========================================
+    // DBから最新の在庫をチェック
+    // ========================================
+    const productIds = items.map((item: CartItem) => item.product.id);
+    const dbProducts = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+
+    // 在庫チェック (DBの最新在庫と比較)
+    const outOfStockItems: { title: string; stock: number; requested: number }[] = [];
+    for (const item of items) {
+      const dbProduct = dbProducts.find((p) => p.id === item.product.id);
+      if (!dbProduct || dbProduct.stock < item.quantity) {
+        outOfStockItems.push({
+          title: item.product.title,
+          stock: dbProduct?.stock || 0,
+          requested: item.quantity,
+        });
+      }
+    }
+
+    if (outOfStockItems.length > 0) {
+      const errorDetails = outOfStockItems
+        .map((item) => `${item.title} (在庫: ${item.stock}, 注文: ${item.requested})`)
+        .join(", ");
+      return NextResponse.json(
+        { error: `在庫不足の商品があります: ${errorDetails}` },
         { status: 400 }
       );
     }

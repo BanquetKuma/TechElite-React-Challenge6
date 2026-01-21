@@ -1,10 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { mockProducts } from "@/data/products";
+import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
-
-// 最新商品として表示する商品（最初の4つ）
-const featuredProducts = mockProducts.slice(0, 4);
 
 // お知らせデータ
 const announcements = [
@@ -31,7 +28,14 @@ const announcements = [
   },
 ];
 
-export default function HomePage() {
+// Server Component: 直接Prismaでデータ取得
+export default async function HomePage() {
+  // DBから最新商品4件を取得
+  const featuredProducts = await prisma.product.findMany({
+    take: 4,
+    orderBy: { id: "asc" },
+  });
+
   return (
     <div className={styles.container}>
       {/* Hero Section */}

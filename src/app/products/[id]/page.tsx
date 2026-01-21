@@ -5,13 +5,14 @@
 // ========================================
 // 商品詳細ページ
 // 動的ルーティングで商品IDを取得
+// 変更: モックデータ → API経由でDBから取得 (動的在庫対応)
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { getProductById } from "@/data/products";
 import { useCart } from "@/context/CartContext";
+import { Product } from "@/types";
 import styles from "./page.module.css";
 
 // カテゴリ名の日本語マッピング
@@ -30,8 +31,35 @@ export default function ProductDetailPage() {
   // URLパラメータから商品IDを取得
   const productId = Number(params.id);
 
-  // 商品データを取得
-  const product = useMemo(() => getProductById(productId), [productId]);
+  // 商品データの状態
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // APIから商品データを取得 (DBから最新在庫を取得)
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(`/api/products/${productId}`);
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          setProduct(data.data);
+        } else {
+          setError(data.error || "商品が見つかりません");
+        }
+      } catch (err) {
+        setError("商品の取得に失敗しました");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
 
   // 数量の状態
   const [quantity, setQuantity] = useState(1);
@@ -39,15 +67,27 @@ export default function ProductDetailPage() {
   // カートに追加成功のフィードバック
   const [showFeedback, setShowFeedback] = useState(false);
 
-  // 商品が見つからない場合
-  if (!product) {
+  // ローディング中
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.notFound}>
+          <div className={styles.notFoundIcon}>⏳</div>
+          <h1 className={styles.notFoundTitle}>読み込み中...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  // エラーまたは商品が見つからない場合
+  if (error || !product) {
     return (
       <div className={styles.container}>
         <div className={styles.notFound}>
           <div className={styles.notFoundIcon}>📦</div>
           <h1 className={styles.notFoundTitle}>商品が見つかりません</h1>
           <p className={styles.notFoundText}>
-            お探しの商品は存在しないか、削除された可能性があります。
+            {error || "お探しの商品は存在しないか、削除された可能性があります。"}
           </p>
           <Link href="/products" className={styles.backLink}>
             商品一覧に戻る

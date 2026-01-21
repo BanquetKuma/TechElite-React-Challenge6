@@ -29,18 +29,29 @@ export function CartProvider({ children }: CartProviderProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // ----------------------------------------
-  // カートに商品を追加
+  // カートに商品を追加 (在庫上限チェック付き)
   // ----------------------------------------
   const addItem = useCallback((product: Product) => {
     setCartItems((prev) => {
+      // 在庫0の場合は追加しない
+      if (product.stock <= 0) {
+        return prev;
+      }
+
       // 既にカートに存在するか確認
       const existingItem = prev.find((item) => item.product.id === product.id);
+      const currentQty = existingItem ? existingItem.quantity : 0;
+
+      // 在庫上限チェック
+      if (currentQty >= product.stock) {
+        return prev; // 在庫上限に達しているため追加しない
+      }
 
       if (existingItem) {
-        // 存在する場合は数量を+1
+        // 存在する場合は数量を+1 (在庫上限を超えない)
         return prev.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) }
             : item
         );
       }
@@ -60,7 +71,7 @@ export function CartProvider({ children }: CartProviderProps) {
   }, []);
 
   // ----------------------------------------
-  // 商品の数量を更新
+  // 商品の数量を更新 (在庫上限チェック付き)
   // ----------------------------------------
   const updateQuantity = useCallback(
     (productId: number, quantity: number) => {
@@ -71,9 +82,14 @@ export function CartProvider({ children }: CartProviderProps) {
       }
 
       setCartItems((prev) =>
-        prev.map((item) =>
-          item.product.id === productId ? { ...item, quantity } : item
-        )
+        prev.map((item) => {
+          if (item.product.id === productId) {
+            // 在庫数を超えないようにする
+            const limitedQty = Math.min(quantity, item.product.stock);
+            return { ...item, quantity: limitedQty };
+          }
+          return item;
+        })
       );
     },
     [removeItem]

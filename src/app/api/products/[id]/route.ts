@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProductById } from "@/data/products";
+import { prisma } from "@/lib/prisma";
 
 // ========================================
-// GET: 商品詳細を取得
+// GET: 商品詳細を取得 (Prisma経由)
 // ========================================
-// [id] の部分が params.id として渡される
+// 変更点: getProductById() -> prisma.product.findUnique()
+// DBから最新の在庫情報を含む商品データを取得
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -22,8 +23,10 @@ export async function GET(
       );
     }
 
-    // 商品を検索
-    const product = getProductById(productId);
+    // Prisma でDBから商品を検索
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
 
     // 見つからない場合
     if (!product) {
@@ -39,6 +42,7 @@ export async function GET(
       data: product,
     });
   } catch (error) {
+    console.error("GET /api/products/[id] error:", error);
     return NextResponse.json(
       { success: false, error: "商品の取得に失敗しました" },
       { status: 500 }

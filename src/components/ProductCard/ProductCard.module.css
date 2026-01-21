@@ -146,14 +146,14 @@
 }
 
 .card.disabled .detailLink {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
-  cursor: not-allowed;
+  background-color: #6b7280;
+  color: white;
+  cursor: pointer;
 }
 
 .card.disabled .detailLink:hover {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
+  background-color: #4b5563;
+  color: white;
 }
 
 /* お気に入りボタン */

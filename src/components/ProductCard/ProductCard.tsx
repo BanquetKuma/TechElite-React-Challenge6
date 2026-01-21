@@ -106,13 +106,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* 商品詳細リンク */}
-        {isOutOfStock ? (
-          <span className={styles.detailLink}>在庫切れ</span>
-        ) : (
-          <Link href={`/products/${id}`} className={styles.detailLink}>
-            商品を見る
-          </Link>
-        )}
+        <Link href={`/products/${id}`} className={styles.detailLink}>
+          {isOutOfStock ? "詳細を見る" : "商品を見る"}
+        </Link>
       </div>
     </article>
   );

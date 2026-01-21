@@ -44,3 +44,21 @@ model Order {
 
   user         User     @relation(fields: [userId], references: [id])
 }
+
+// ========================================
+// Product Model
+// ========================================
+// 解説: 商品情報を管理するテーブル
+// - stock: 在庫数 (注文確定時に減算)
+// - 注文時に在庫をチェックし、在庫切れを防止
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String
+  price       Int
+  description String
+  imageUrl    String
+  category    String
+  stock       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

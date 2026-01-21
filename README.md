@@ -38,8 +38,15 @@ https://tech-elite-react-challenge6.vercel.app/
 
 ### データ永続化
 - 注文履歴のDB保存 (Supabase)
+- 商品データのDB管理 (動的在庫)
 - ユーザー別注文履歴表示
 - Vercelデプロイ後も永続化維持
+
+### 動的在庫管理 (新規)
+- 商品在庫のリアルタイム管理
+- 注文確定時に在庫を自動減算
+- 在庫切れ商品の購入防止
+- DB在庫チェック (決済前・注文確定時)
 
 ### Stripe決済連携 (新規)
 - クレジットカード決済 (Stripe Checkout)
@@ -170,6 +177,27 @@ model Order {
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id])
 }
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String
+  price       Int
+  description String
+  imageUrl    String
+  category    String
+  stock       Int      @default(0)  // 動的在庫管理
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
+
+### 在庫管理フロー
+
+```
+1. 商品ページ表示 → DBから最新在庫を取得
+2. カート追加 → 在庫上限チェック
+3. Stripe決済前 → DBから在庫を再確認
+4. 注文確定 → トランザクションで在庫を減算
 ```
 
 ## セットアップ
